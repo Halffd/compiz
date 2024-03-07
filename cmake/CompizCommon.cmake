@@ -54,7 +54,6 @@ set (
 
 # Almost everything is a shared library now, so almost everything needs -fPIC
 set (COMMON_FLAGS "-fPIC -Wall")
-set (COMMON_CXX_FLAGS "-std=c++11")
 
 option (COMPIZ_SUBOBJECT_LINKAGE_WARNINGS "Warn about subobject linkage" OFF)
 if (NOT COMPIZ_SUBOBJECT_LINKAGE_WARNINGS)

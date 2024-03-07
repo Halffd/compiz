@@ -9,7 +9,6 @@ link_directories (${CMAKE_CURRENT_BINARY_DIR}/../../mocks/libcompizconfig)
 link_directories (${CMAKE_CURRENT_BINARY_DIR}/../../tests/)
 link_directories (${CMAKE_CURRENT_BINARY_DIR}/../src/)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_definitions (-DCONFIGDIR="${COMPIZCONFIG_CONFIG_DIR}")
 
