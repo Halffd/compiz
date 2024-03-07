@@ -1,3 +1,9 @@
+compiz (1:0.9.14.2+22.10.20220822-0ubuntu6) noble; urgency=medium
+
+  * Adjust path for the CompizConfigPython tests (LP: #2050888)
+
+ -- Graham Inggs <ginggs@ubuntu.com>  Tue, 23 Jan 2024 17:37:25 +0000
+
 compiz (1:0.9.14.2+22.10.20220822-0ubuntu5) noble; urgency=medium
 
   * No-change rebuild with Python 3.12 as default

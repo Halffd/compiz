@@ -11,7 +11,7 @@ os.environ["XDG_CONFIG_HOME"] = "compizconfig/libcompizconfig/config"
 os.environ["LIBCOMPIZCONFIG_BACKEND_PATH"] = "compizconfig/libcompizconfig/backend/"
 os.environ["XDG_DATA_DIRS"] = "generated/"
 
-sys.path.insert (0, "compizconfig/compizconfig-python/build/lib.%s-%s.%s" % (arch, *sys.version_info[:2]))
+sys.path.insert (0, "compizconfig/compizconfig-python/build/lib.%s-cpython-%s%s" % (arch, *sys.version_info[:2]))
 
 import unittest
 import compizconfig
