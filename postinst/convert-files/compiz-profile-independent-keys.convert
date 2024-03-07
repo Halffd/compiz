@@ -39,7 +39,6 @@ toggle-fullscreen = /apps/metacity/window_keybindings/toggle_fullscreen
 toggle-maximized = /apps/metacity/window_keybindings/toggle_maximized
 maximize = /apps/metacity/window_keybindings/maximize
 unmaximize = /apps/metacity/window_keybindings/unmaximize
-toggle-shaded = /apps/metacity/window_keybindings/toggle_shaded
 close = /apps/metacity/window_keybindings/close
 minimize = /apps/metacity/window_keybindings/minimize
 begin-move = /apps/metacity/window_keybindings/begin_move

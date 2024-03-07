@@ -11,8 +11,6 @@
 
 	<KeyListEntry name="unmaximize" _description="Restore window" />
 
-	<KeyListEntry name="toggle-shaded" _description="Toggle shaded state" />
-
 	<KeyListEntry name="close" _description="Close window" />
 
 	<KeyListEntry name="minimize" _description="Minimize window" />

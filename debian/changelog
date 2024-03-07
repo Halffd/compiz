@@ -1,3 +1,10 @@
+compiz (1:0.9.14.2+22.10.20220822-0ubuntu8) noble; urgency=medium
+
+  * Drop toggle-shaded since it's no longer included in
+    gsettings-desktop-schemas 45 (LP: #2045493)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 07 Mar 2024 15:46:39 -0500
+
 compiz (1:0.9.14.2+22.10.20220822-0ubuntu7) noble; urgency=medium
 
   * No-change rebuild against libpng16-16t64
