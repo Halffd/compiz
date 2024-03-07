@@ -1,3 +1,9 @@
+compiz (1:0.9.14.2+22.10.20220822-0ubuntu3) lunar; urgency=medium
+
+  * Rebuild against new libprotobuf32.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Mon, 09 Jan 2023 19:39:45 +0100
+
 compiz (1:0.9.14.2+22.10.20220822-0ubuntu2) lunar; urgency=medium
 
   * No-change rebuild with Python 3.11 as default
