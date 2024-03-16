@@ -1,3 +1,9 @@
+compiz (1:0.9.14.2+22.10.20220822-0ubuntu11) noble; urgency=medium
+
+  * Apply patches from debian/patches since this is not a 3.0 (quilt) package
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 16 Mar 2024 03:09:58 +0000
+
 compiz (1:0.9.14.2+22.10.20220822-0ubuntu10) noble; urgency=medium
 
   * Rename libraries for 64-bit time_t transition.  Closes: #1061901

@@ -2315,19 +2315,22 @@ static const unsigned int STARTUP_TIMEOUT_DELAY = 15000;
 bool
 cps::StartupSequence::handleStartupSequenceTimeout ()
 {
-    struct timeval	now, active;
+    struct timeval	now;
     double		elapsed;
 
     gettimeofday (&now, NULL);
 
     foreach (CompStartupSequence *s, startupSequences)
     {
+        /* workaround for broken startup-notification api that uses
+           a long where it should have used time_t */
+	long seconds, useconds;
 	sn_startup_sequence_get_last_active_time (s->sequence,
-						  &active.tv_sec,
-						  &active.tv_usec);
+						  &seconds,
+						  &useconds);
 
-	elapsed = ((((double) now.tv_sec - active.tv_sec) * 1000000.0 +
-		    (now.tv_usec - active.tv_usec))) / 1000.0;
+	elapsed = ((((double) now.tv_sec - seconds) * 1000000.0 +
+		    (now.tv_usec - useconds))) / 1000.0;
 
 	if (elapsed > STARTUP_TIMEOUT_DELAY)
 	    sn_startup_sequence_complete (s->sequence);
