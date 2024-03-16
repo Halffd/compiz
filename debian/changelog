@@ -1,3 +1,11 @@
+compiz (1:0.9.14.2+22.10.20220822-0ubuntu10) noble; urgency=medium
+
+  * Rename libraries for 64-bit time_t transition.  Closes: #1061901
+  * debian/patches/64-bit-time-t-compat.patch: fix build with
+    _TIME_BITS=64.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 16 Mar 2024 01:07:26 +0000
+
 compiz (1:0.9.14.2+22.10.20220822-0ubuntu9) noble; urgency=medium
 
   * No-change rebuild against libglib2.0-0t64
