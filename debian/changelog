@@ -1,3 +1,9 @@
+compiz (1:0.9.14.2+22.10.20220822-0ubuntu12) noble; urgency=medium
+
+  * No-change rebuild for CVE-2024-3094
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 31 Mar 2024 00:48:15 +0000
+
 compiz (1:0.9.14.2+22.10.20220822-0ubuntu11) noble; urgency=medium
 
   * Apply patches from debian/patches since this is not a 3.0 (quilt) package
