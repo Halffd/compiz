@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompizconfig_ccs_setting_value_operators.a CMakeFiles/compizconfig_ccs_setting_value_operators.dir/compizconfig_ccs_setting_value_operators.cpp.o
+/usr/bin/ranlib libcompizconfig_ccs_setting_value_operators.a

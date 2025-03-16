@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompiz_place_constrain_to_workarea_test.a "CMakeFiles/compiz_place_constrain_to_workarea_test.dir/test-constrain-to-workarea.cpp.o"
+/usr/bin/ranlib libcompiz_place_constrain_to_workarea_test.a

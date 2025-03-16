@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompizconfig_ccs_item_in_list_matcher.a CMakeFiles/compizconfig_ccs_item_in_list_matcher.dir/compizconfig_ccs_item_in_list_matcher.cpp.o
+/usr/bin/ranlib libcompizconfig_ccs_item_in_list_matcher.a

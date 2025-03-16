@@ -1,0 +1,2 @@
+ADD_TEST (CompWindowGeometryTestGeometry.TestGeometry "/home/half-arch/repos/compiz/build/src/window/geometry/tests/compiz_test_window_geometry" "--gtest_filter=CompWindowGeometryTestGeometry.TestGeometry")
+ADD_TEST (CompWindowGeometryTestGeometry.TestBorders "/home/half-arch/repos/compiz/build/src/window/geometry/tests/compiz_test_window_geometry" "--gtest_filter=CompWindowGeometryTestGeometry.TestBorders")

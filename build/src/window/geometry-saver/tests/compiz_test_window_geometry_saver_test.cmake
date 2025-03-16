@@ -1,0 +1,1 @@
+ADD_TEST (CompWindowGeometryTestSaver.TestSaver "/home/half-arch/repos/compiz/build/src/window/geometry-saver/tests/compiz_test_window_geometry_saver" "--gtest_filter=CompWindowGeometryTestSaver.TestSaver")

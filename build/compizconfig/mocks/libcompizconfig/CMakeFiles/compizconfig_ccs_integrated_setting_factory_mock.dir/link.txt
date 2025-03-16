@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompizconfig_ccs_integrated_setting_factory_mock.a CMakeFiles/compizconfig_ccs_integrated_setting_factory_mock.dir/compizconfig_ccs_integrated_setting_factory_mock.cpp.o
+/usr/bin/ranlib libcompizconfig_ccs_integrated_setting_factory_mock.a

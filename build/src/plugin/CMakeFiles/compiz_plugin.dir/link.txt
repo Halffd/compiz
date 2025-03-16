@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompiz_plugin.a CMakeFiles/compiz_plugin.dir/__/plugin.cpp.o
+/usr/bin/ranlib libcompiz_plugin.a

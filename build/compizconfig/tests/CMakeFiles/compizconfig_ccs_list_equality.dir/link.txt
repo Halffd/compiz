@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompizconfig_ccs_list_equality.a CMakeFiles/compizconfig_ccs_list_equality.dir/compizconfig_ccs_list_equality.cpp.o
+/usr/bin/ranlib libcompizconfig_ccs_list_equality.a

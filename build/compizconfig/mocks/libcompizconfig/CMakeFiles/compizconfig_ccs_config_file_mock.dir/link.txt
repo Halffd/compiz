@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompizconfig_ccs_config_file_mock.a CMakeFiles/compizconfig_ccs_config_file_mock.dir/compizconfig_ccs_config_file_mock.cpp.o
+/usr/bin/ranlib libcompizconfig_ccs_config_file_mock.a

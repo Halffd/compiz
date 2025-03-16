@@ -1,0 +1,14 @@
+# CMake generated Testfile for 
+# Source directory: /home/half-arch/repos/compiz/compizconfig/compizconfig-python
+# Build directory: /home/half-arch/repos/compiz/build/compizconfig/compizconfig-python
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+add_test(CompizConfigPython.test_backend "/usr/bin/bash" "/home/half-arch/repos/compiz/tests/util/run_with_ld_library_path.sh" "/home/half-arch/repos/compiz/build/compizconfig/libcompizconfig/src" "/home/half-arch/miniconda3/bin/python3.12" "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/tests/test_backend.py")
+set_tests_properties(CompizConfigPython.test_backend PROPERTIES  WORKING_DIRECTORY "/home/half-arch/repos/compiz/build" _BACKTRACE_TRIPLES "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;64;add_test;/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;0;")
+add_test(CompizConfigPython.test_plugin "/usr/bin/bash" "/home/half-arch/repos/compiz/tests/util/run_with_ld_library_path.sh" "/home/half-arch/repos/compiz/build/compizconfig/libcompizconfig/src" "/home/half-arch/miniconda3/bin/python3.12" "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/tests/test_plugin.py")
+set_tests_properties(CompizConfigPython.test_plugin PROPERTIES  WORKING_DIRECTORY "/home/half-arch/repos/compiz/build" _BACKTRACE_TRIPLES "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;64;add_test;/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;0;")
+add_test(CompizConfigPython.test_profile "/usr/bin/bash" "/home/half-arch/repos/compiz/tests/util/run_with_ld_library_path.sh" "/home/half-arch/repos/compiz/build/compizconfig/libcompizconfig/src" "/home/half-arch/miniconda3/bin/python3.12" "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/tests/test_profile.py")
+set_tests_properties(CompizConfigPython.test_profile PROPERTIES  WORKING_DIRECTORY "/home/half-arch/repos/compiz/build" _BACKTRACE_TRIPLES "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;64;add_test;/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;0;")
+add_test(CompizConfigPython.test_setting "/usr/bin/bash" "/home/half-arch/repos/compiz/tests/util/run_with_ld_library_path.sh" "/home/half-arch/repos/compiz/build/compizconfig/libcompizconfig/src" "/home/half-arch/miniconda3/bin/python3.12" "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/tests/test_setting.py")
+set_tests_properties(CompizConfigPython.test_setting PROPERTIES  WORKING_DIRECTORY "/home/half-arch/repos/compiz/build" _BACKTRACE_TRIPLES "/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;64;add_test;/home/half-arch/repos/compiz/compizconfig/compizconfig-python/CMakeLists.txt;0;")

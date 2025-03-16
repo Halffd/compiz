@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompiz_pch_test.a "CMakeFiles/compiz_pch_test.dir/test-pluginclasshandler.cpp.o"
+/usr/bin/ranlib libcompiz_pch_test.a

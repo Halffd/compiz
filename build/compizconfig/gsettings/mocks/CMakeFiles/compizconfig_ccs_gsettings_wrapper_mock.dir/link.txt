@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompizconfig_ccs_gsettings_wrapper_mock.a CMakeFiles/compizconfig_ccs_gsettings_wrapper_mock.dir/ccs_gsettings_wrapper_mock.cpp.o
+/usr/bin/ranlib libcompizconfig_ccs_gsettings_wrapper_mock.a
