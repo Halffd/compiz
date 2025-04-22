@@ -1,5 +1,0 @@
-ADD_TEST (OutputDevices.TrivialSingleMonitor "/home/half-arch/repos/compiz/build/src/tests/compiz_test_outputdevices" "--gtest_filter=OutputDevices.TrivialSingleMonitor")
-ADD_TEST (OutputDevices.SideBySide "/home/half-arch/repos/compiz/build/src/tests/compiz_test_outputdevices" "--gtest_filter=OutputDevices.SideBySide")
-ADD_TEST (OutputDevices.LaptopBelowMonitor "/home/half-arch/repos/compiz/build/src/tests/compiz_test_outputdevices" "--gtest_filter=OutputDevices.LaptopBelowMonitor")
-ADD_TEST (OutputDevices.LaptopNextToMonitor "/home/half-arch/repos/compiz/build/src/tests/compiz_test_outputdevices" "--gtest_filter=OutputDevices.LaptopNextToMonitor")
-ADD_TEST (OutputDevices.FourSquare "/home/half-arch/repos/compiz/build/src/tests/compiz_test_outputdevices" "--gtest_filter=OutputDevices.FourSquare")

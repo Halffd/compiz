@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_string.a CMakeFiles/compiz_string.dir/src/string.cpp.o
-/usr/bin/ranlib libcompiz_string.a

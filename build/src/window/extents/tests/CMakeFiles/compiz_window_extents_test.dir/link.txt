@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_window_extents_test.a "CMakeFiles/compiz_window_extents_test.dir/test-window-extents.cpp.o"
-/usr/bin/ranlib libcompiz_window_extents_test.a

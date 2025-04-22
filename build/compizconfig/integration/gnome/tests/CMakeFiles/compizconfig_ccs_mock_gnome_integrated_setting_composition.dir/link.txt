@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_mock_gnome_integrated_setting_composition.a CMakeFiles/compizconfig_ccs_mock_gnome_integrated_setting_composition.dir/compizconfig_ccs_mock_gnome_integrated_setting_composition.c.o
-/usr/bin/ranlib libcompizconfig_ccs_mock_gnome_integrated_setting_composition.a

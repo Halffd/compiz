@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_setting_stub.a CMakeFiles/compizconfig_ccs_setting_stub.dir/compizconfig_ccs_setting_stub.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_setting_stub.a

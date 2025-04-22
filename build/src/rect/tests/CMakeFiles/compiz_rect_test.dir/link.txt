@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_rect_test.a "CMakeFiles/compiz_rect_test.dir/test-rect.cpp.o"
-/usr/bin/ranlib libcompiz_rect_test.a

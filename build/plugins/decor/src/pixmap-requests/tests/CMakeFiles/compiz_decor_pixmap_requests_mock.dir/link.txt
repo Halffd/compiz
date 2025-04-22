@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_decor_pixmap_requests_mock.a CMakeFiles/compiz_decor_pixmap_requests_mock.dir/compiz_decor_pixmap_requests_mock.cpp.o
-/usr/bin/ranlib libcompiz_decor_pixmap_requests_mock.a

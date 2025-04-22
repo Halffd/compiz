@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_place_screen_size_change_test.a "CMakeFiles/compiz_place_screen_size_change_test.dir/test-screen-size-change.cpp.o"
-/usr/bin/ranlib libcompiz_place_screen_size_change_test.a

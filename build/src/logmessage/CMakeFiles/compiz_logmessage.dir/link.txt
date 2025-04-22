@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_logmessage.a CMakeFiles/compiz_logmessage.dir/src/logmessage.cpp.o
-/usr/bin/ranlib libcompiz_logmessage.a

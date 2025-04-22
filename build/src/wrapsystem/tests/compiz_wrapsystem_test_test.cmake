@@ -1,6 +1,0 @@
-ADD_TEST (WrapSystem.an_interface_never_gets_functions_called "/home/half-arch/repos/compiz/build/src/wrapsystem/tests/compiz_wrapsystem_test" "--gtest_filter=WrapSystem.an_interface_never_gets_functions_called")
-ADD_TEST (WrapSystem.an_interface_never_gets_void_functions_called "/home/half-arch/repos/compiz/build/src/wrapsystem/tests/compiz_wrapsystem_test" "--gtest_filter=WrapSystem.an_interface_never_gets_void_functions_called")
-ADD_TEST (WrapSystem.an_implementation_gets_functions_called "/home/half-arch/repos/compiz/build/src/wrapsystem/tests/compiz_wrapsystem_test" "--gtest_filter=WrapSystem.an_implementation_gets_functions_called")
-ADD_TEST (WrapSystem.a_wrapper_gets_its_functions_called "/home/half-arch/repos/compiz/build/src/wrapsystem/tests/compiz_wrapsystem_test" "--gtest_filter=WrapSystem.a_wrapper_gets_its_functions_called")
-ADD_TEST (WrapSystem.a_wrapper_doesnt_get_disabled_functions_called "/home/half-arch/repos/compiz/build/src/wrapsystem/tests/compiz_wrapsystem_test" "--gtest_filter=WrapSystem.a_wrapper_doesnt_get_disabled_functions_called")
-ADD_TEST (WrapSystem.two_wrappers_get_their_functions_called "/home/half-arch/repos/compiz/build/src/wrapsystem/tests/compiz_wrapsystem_test" "--gtest_filter=WrapSystem.two_wrappers_get_their_functions_called")

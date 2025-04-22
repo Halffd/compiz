@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_list_wrapper.a CMakeFiles/compizconfig_ccs_list_wrapper.dir/compizconfig_ccs_list_wrapper.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_list_wrapper.a

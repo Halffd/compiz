@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_backend_loader_mock.a CMakeFiles/compizconfig_ccs_backend_loader_mock.dir/compizconfig_ccs_backend_loader_mock.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_backend_loader_mock.a

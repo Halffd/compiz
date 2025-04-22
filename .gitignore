@@ -1,1 +1,6 @@
 po/compiz.pot
+build
+*.log
+vuilds
+builds/*
+build/*

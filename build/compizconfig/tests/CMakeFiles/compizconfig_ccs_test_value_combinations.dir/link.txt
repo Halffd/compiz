@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_test_value_combinations.a CMakeFiles/compizconfig_ccs_test_value_combinations.dir/compizconfig_test_value_combiners.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_test_value_combinations.a

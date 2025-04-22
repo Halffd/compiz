@@ -1,0 +1,19 @@
+--- plugins/fade/fade.xml.in	2019-02-16 12:44:41.000000000 +0000
++++ plugins/fade/fade.xml.in	2019-02-17 14:11:58.772752647 +0000
+@@ -10,7 +10,6 @@
+ 	    </requirement>
+ 	    <relation type="after">
+ 		<plugin>decor</plugin>
+-		<plugin>staticswitcher</plugin>
+ 	    </relation>
+ 	    <relation type="before">
+ 		<plugin>cube</plugin>
+@@ -51,7 +50,7 @@
+ 	    <option name="window_match" type="match">
+ 		<_short>Fade windows</_short>
+ 		<_long>Windows that should be fading</_long>
+-                <default>any &amp; !(title=notify-osd)</default>
++		<default>any</default>
+ 	    </option>
+ 	    <option name="visual_bell" type="bell">
+ 		<_short>Visual Bell</_short>

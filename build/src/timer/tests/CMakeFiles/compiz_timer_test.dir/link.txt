@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_timer_test.a "CMakeFiles/compiz_timer_test.dir/test-timer.cpp.o"
-/usr/bin/ranlib libcompiz_timer_test.a

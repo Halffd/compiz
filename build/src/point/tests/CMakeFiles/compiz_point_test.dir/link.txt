@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_point_test.a "CMakeFiles/compiz_point_test.dir/test-point.cpp.o"
-/usr/bin/ranlib libcompiz_point_test.a

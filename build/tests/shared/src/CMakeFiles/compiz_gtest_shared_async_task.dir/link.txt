@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_gtest_shared_async_task.a CMakeFiles/compiz_gtest_shared_async_task.dir/gtest_shared_asynctask.cpp.o
-/usr/bin/ranlib libcompiz_gtest_shared_async_task.a

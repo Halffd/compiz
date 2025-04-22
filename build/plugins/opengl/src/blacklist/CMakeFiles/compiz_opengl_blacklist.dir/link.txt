@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_opengl_blacklist.a CMakeFiles/compiz_opengl_blacklist.dir/blacklist.cpp.o
-/usr/bin/ranlib libcompiz_opengl_blacklist.a

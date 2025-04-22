@@ -1,1 +1,0 @@
-ADD_TEST (CompWindowConstrainmentTestToHints.ToHints "/home/half-arch/repos/compiz/build/src/window/constrainment/tests/compiz_test_window_constrainment_to_hints" "--gtest_filter=CompWindowConstrainmentTestToHints.ToHints")

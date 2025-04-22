@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_window_geometry_saver_test.a "CMakeFiles/compiz_window_geometry_saver_test.dir/test-window-geometry-saver.cpp.o"
-/usr/bin/ranlib libcompiz_window_geometry_saver_test.a

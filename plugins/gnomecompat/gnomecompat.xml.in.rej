@@ -1,0 +1,10 @@
+--- plugins/gnomecompat/gnomecompat.xml.in	2019-02-16 12:44:41.000000000 +0000
++++ plugins/gnomecompat/gnomecompat.xml.in	2019-02-17 14:11:58.772752647 +0000
+@@ -57,7 +57,6 @@
+ 		<option name="run_command_terminal_key" type="key">
+ 		    <_short>Open a terminal</_short>
+ 		    <_long>Open a terminal</_long>
+-		    <default>&lt;Control&gt;&lt;Alt&gt;T</default>
+ 		</option>
+ 	    </group>
+ 	</options>

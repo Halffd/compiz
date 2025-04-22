@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_setting_value_matcher.a CMakeFiles/compizconfig_ccs_setting_value_matcher.dir/compizconfig_ccs_setting_value_matcher.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_setting_value_matcher.a

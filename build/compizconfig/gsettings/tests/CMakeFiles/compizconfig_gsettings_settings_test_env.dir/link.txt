@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_gsettings_settings_test_env.a CMakeFiles/compizconfig_gsettings_settings_test_env.dir/compizconfig_ccs_gsettings_settings_env_test.cpp.o
-/usr/bin/ranlib libcompizconfig_gsettings_settings_test_env.a

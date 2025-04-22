@@ -1,0 +1,16 @@
+--- plugins/vpswitch/vpswitch.xml.in	2019-02-16 12:44:41.000000000 +0000
++++ plugins/vpswitch/vpswitch.xml.in	2019-02-17 14:11:58.782757647 +0000
+@@ -95,11 +95,13 @@
+ 				<option name="next_button" type="button">
+ 					<_short>Move Next</_short>
+ 					<_long>Move to the next viewport</_long>
++					<default>Button5</default>
+ 					<internal/>
+ 				</option>
+ 				<option name="prev_button" type="button">
+ 					<_short>Move Prev</_short>
+ 					<_long>Move to the previous viewport</_long>
++					<default>Button4</default>
+ 					<internal/>
+ 				</option>
+ 				<option name="initiate_button" type="button">

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_size.a CMakeFiles/compiz_size.dir/size.cpp.o
-/usr/bin/ranlib libcompiz_size.a

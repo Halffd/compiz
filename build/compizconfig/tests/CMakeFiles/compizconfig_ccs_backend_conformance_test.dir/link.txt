@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_backend_conformance_test.a CMakeFiles/compizconfig_ccs_backend_conformance_test.dir/compizconfig_backend_concept_test.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_backend_conformance_test.a

@@ -1,2 +1,0 @@
-# Empty custom commands generated dependencies file for nls-update-lv.po.
-# This may be replaced when dependencies are built.

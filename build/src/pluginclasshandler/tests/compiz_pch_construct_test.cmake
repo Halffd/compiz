@@ -1,1 +1,0 @@
-ADD_TEST (PluginClassHandlerConstruction.TestConstruction "/home/half-arch/repos/compiz/build/src/pluginclasshandler/tests/compiz_pch_construct" "--gtest_filter=PluginClassHandlerConstruction.TestConstruction")

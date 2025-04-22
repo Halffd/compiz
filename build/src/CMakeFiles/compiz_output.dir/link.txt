@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompiz_output.a CMakeFiles/compiz_output.dir/output.cpp.o
-/usr/bin/ranlib libcompiz_output.a

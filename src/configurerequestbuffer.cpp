@@ -267,9 +267,10 @@ bool isLock (const crb::Lockable::Weak &lockable,
 void
 crb::ConfigureRequestBuffer::untrackLock (crb::BufferLock *lock)
 {
-    std::remove_if (priv->locks.begin (),
-		    priv->locks.end (),
-		    boost::bind (isLock, _1, lock));
+    priv->locks.erase (std::remove_if (priv->locks.begin (),
+				       priv->locks.end (),
+				       boost::bind (isLock, _1, lock)),
+		       priv->locks.end ());
 }
 
 bool crb::ConfigureRequestBuffer::queryAttributes (XWindowAttributes &attrib)

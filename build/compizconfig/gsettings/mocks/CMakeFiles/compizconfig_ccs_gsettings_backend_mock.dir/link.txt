@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcompizconfig_ccs_gsettings_backend_mock.a CMakeFiles/compizconfig_ccs_gsettings_backend_mock.dir/ccs_gsettings_backend_mock.cpp.o
-/usr/bin/ranlib libcompizconfig_ccs_gsettings_backend_mock.a
