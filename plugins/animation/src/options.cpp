@@ -232,8 +232,9 @@ PrivateAnimScreen::updateOptionSet (OptionSet  *os,
 
 	CompOption::Value v;
 
-	os->pairs.push_back (IdValuePair (v));
+	os->pairs.push_back (IdValuePair ());
 	IdValuePair *pair = &os->pairs[i];
+	pair->value = v;
 
 	pair->pluginInfo = chosenExtensionPlugin;
 	pair->optionId = optId;

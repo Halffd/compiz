@@ -340,13 +340,13 @@ decor_frame_t *
 create_normal_frame (const gchar *type);
 
 void
-destroy_normal_frame ();
+destroy_normal_frame (decor_frame_t *frame);
 
 decor_frame_t *
 create_bare_frame (const gchar *type);
 
 void
-destroy_bare_frame ();
+destroy_bare_frame (decor_frame_t *frame);
 
 /* Don't use directly */
 gboolean
@@ -505,7 +505,7 @@ decor_frame_t *
 create_switcher_frame (const gchar *);
 
 void
-destroy_switcher_frame ();
+destroy_switcher_frame (decor_frame_t *frame);
 
 gboolean
 update_switcher_window (Window     popup,
