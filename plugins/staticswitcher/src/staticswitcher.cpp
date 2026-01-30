@@ -189,7 +189,8 @@ StaticSwitchScreen::createWindowList ()
 {
     windows.clear ();
 
-    foreach (CompWindow *w, ::screen->windows ())
+    // Use the client list order which is more stable than screen->windows()
+    foreach (CompWindow *w, ::screen->clientList ())
     {
 	SWITCH_WINDOW (w);
 
@@ -201,6 +202,7 @@ StaticSwitchScreen::createWindowList ()
 	}
     }
 
+    // Sort by active number to maintain MRU (most recently used) order
     windows.sort (BaseSwitchScreen::compareWindows);
 
     updateWindowList ();
