@@ -316,54 +316,8 @@ StaticSwitchScreen::handleSelectionChange (bool toNext, int nextIdx)
         updateScrollbar();
     }
 
-    // If switch-on-selected is enabled, switch immediately when selection changes
-    if (optionGetSwitchOnSelected() && grabIndex)
-    {
-        // Only activate if highlight_only is disabled
-        if (!optionGetHighlightOnly())
-        {
-            // Terminate the switcher immediately to switch to the selected window
-            CompOption::Vector o (0);
-            o.push_back (CompOption ("root", CompOption::TypeInt));
-            o[0].value ().set ((int) ::screen->root ());
-
-            // Replicate the termination logic from switchTerminate
-            if (popupDelayTimer.active ())
-                popupDelayTimer.stop ();
-
-            if (popupWindow)
-                XUnmapWindow (::screen->dpy (), popupWindow);
-
-            switching = false;
-
-            // State should be TermKey to indicate immediate termination
-            CompAction::State state = CompAction::StateTermKey;
-            if (state && selectedWindow && !selectedWindow->destroyed ())
-                ::screen->sendWindowActivationRequest (selectedWindow->id ());
-
-            ::screen->removeGrab (grabIndex, 0);
-            grabIndex = NULL;
-
-            if (!popupWindow)
-                ::screen->handleEventSetEnabled (this, false);
-
-            selectedWindow = NULL;
-
-            if (screen->activeWindow () != lastActiveWindow)
-            {
-                CompWindow *w = screen->findWindow (lastActiveWindow);
-
-                if (w)
-                    w->moveInputFocusTo ();
-            }
-
-            setSelectedWindowHint (false);
-
-            lastActiveNum = 0;
-
-            cScreen->damageScreen ();
-        }
-    }
+    // During keyboard navigation, only update selection - don't activate the window
+    // Activation only happens when Alt is released or when clicking on a window
 }
 
 void
@@ -944,24 +898,15 @@ StaticSwitchScreen::handleEvent (XEvent *event)
 		    {
 		        selectedWindow = selected;
 
-		        // Check if we should switch immediately or wait for Alt release
-		        if (optionGetSwitchOnSelected() && !optionGetHighlightOnly())
-		        {
-			    CompOption::Vector o (0);
-			    o.push_back (CompOption ("root", CompOption::TypeInt));
-			    o[0].value ().set ((int) ::screen->root ());
+		        // On mouse click, always activate the selected window
+		        CompOption::Vector o (0);
+			o.push_back (CompOption ("root", CompOption::TypeInt));
+			o[0].value ().set ((int) ::screen->root ());
 
-			    // Use a safe termination approach
-			    if (grabIndex) // Double-check that grab still exists
-			    {
-			        switchTerminate (NULL, CompAction::StateTermButton, o);
-			    }
-			}
-			else
+			// Use a safe termination approach
+			if (grabIndex) // Double-check that grab still exists
 			{
-			    // If not switching immediately, just update the selection
-			    // This prevents click-through to the underlying window
-			    move = windows.size(); // Just to trigger update
+			    switchTerminate (NULL, CompAction::StateTermButton, o);
 			}
 		    }
 	        }
