@@ -1,0 +1,16 @@
+char *s = N_("Dim Inactive");
+char *s = N_("Make it slightly easier to concentrate by dimming all but the active window.");
+char *s = N_("Bindings");
+char *s = N_("Toggle AddHelper");
+char *s = N_("Use this to enable/disable AddHelper on the fly.");
+char *s = N_("Misc. Options");
+char *s = N_("Window Types");
+char *s = N_("Window types that should be Opacified.");
+char *s = N_("Enable ADD Helper on start");
+char *s = N_("Enables ADD helper when it is first loaded.");
+char *s = N_("Brightness");
+char *s = N_("Brightness of faded windows");
+char *s = N_("Saturation");
+char *s = N_("Saturation of faded windows");
+char *s = N_("Opacity");
+char *s = N_("Opacity of faded windows");

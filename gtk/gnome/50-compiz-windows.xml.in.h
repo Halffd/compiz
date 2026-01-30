@@ -1,0 +1,14 @@
+char *s = N_("Windows");
+char *s = N_("Activate the window menu");
+char *s = N_("Toggle fullscreen mode");
+char *s = N_("Toggle maximization state");
+char *s = N_("Maximize window");
+char *s = N_("Restore window");
+char *s = N_("Close window");
+char *s = N_("Minimize window");
+char *s = N_("Move window");
+char *s = N_("Resize window");
+char *s = N_("Raise window above other windows");
+char *s = N_("Lower window below other windows");
+char *s = N_("Maximize window vertically");
+char *s = N_("Maximize window horizontally");
