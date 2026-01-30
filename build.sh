@@ -2,7 +2,6 @@
 build() {
   local _cmake_options=(
     -B build
-    -S "$_pkgsrc"
     -G Ninja
     -DCMAKE_BUILD_TYPE=None
     -DCMAKE_INSTALL_PREFIX='/usr'
@@ -18,8 +17,7 @@ build() {
     -Wno-dev
   )
 
-  cmake "${_cmake_options[@]}"
-  cmake --clean build
+  cmake . "${_cmake_options[@]}"
   cmake --build build
 }
 
