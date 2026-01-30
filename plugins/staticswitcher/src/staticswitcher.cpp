@@ -51,27 +51,19 @@ StaticSwitchScreen::updatePopupWindow ()
     winWidth  = ::screen->currentOutputDev ().width () * 98 / 100;
     winHeight = ::screen->currentOutputDev ().height () * 98 / 100;
 
-    if (count <= 1)
-    {
-	/* Only 1 window, display it alone */
-	newXCount = 1;
-	newYCount = 1;
-    }
-    else
-    {
-	/* Calculate max columns based on available width */
-	int maxColsByWidth = (winWidth - 20) / (w + b);  // Subtract 20 for scrollbar space
-	maxColsByWidth = MAX(1, maxColsByWidth);  // At least 1 column
+    /* Calculate max columns based on available width */
+    int maxColsByWidth = (winWidth - 20) / (w + b);  // Subtract 20 for scrollbar space
+    maxColsByWidth = MAX(1, maxColsByWidth);  // At least 1 column
 
-	/* Calculate optimal number of columns to balance rows and columns */
-	newXCount = (int)sqrt(count * (double)(w + b) / (h + b));
-	newXCount = MIN(newXCount, maxColsByWidth);  // Don't exceed available width
-	newXCount = MIN(newXCount, count);  // Don't exceed number of windows
-	newXCount = MAX(1, newXCount);  // At least 1 column
-
-	/* Calculate rows needed based on chosen number of columns */
-	newYCount = (count + newXCount - 1) / newXCount;  // Ceiling division
+    /* Use a fixed number of columns based on available width, regardless of window count */
+    newXCount = maxColsByWidth;
+    if (newXCount > count) {
+        newXCount = count;  // Don't exceed number of windows
     }
+    newXCount = MAX(1, newXCount);  // At least 1 column
+
+    /* Calculate rows needed based on chosen number of columns */
+    newYCount = (count + newXCount - 1) / newXCount;  // Ceiling division
 
     // Account for scrollbar width if needed
     int effectiveWidth = winWidth;
@@ -203,45 +195,10 @@ StaticSwitchScreen::createWindowList ()
 
 	if (sw->isSwitchWin ())
 	{
-	    // For CurrentViewport mode, only include windows on the current output
-	    if (selection == CurrentViewport) {
-		// Check if window is on the current output
-		CompOutput *currentOutput = &::screen->currentOutputDev();
-		CompRect windowRect(w->serverX(), w->serverY(), w->serverWidth(), w->serverHeight());
-		CompRect outputRect(currentOutput->region()->extents.x1,
-		                    currentOutput->region()->extents.y1,
-		                    currentOutput->region()->extents.x2 - currentOutput->region()->extents.x1,
-		                    currentOutput->region()->extents.y2 - currentOutput->region()->extents.y1);
-
-		// Only add window if it's on the current output or intersects with it
-		if (windowRect.intersects(outputRect)) {
-		    windows.push_back (w);
-		}
-		// If no windows are found on current output, fall back to all windows
-		// to prevent empty switcher
-		else if (windows.empty() && ::screen->windows().size() > 0) {
-		    // This is a fallback - if no windows on current output, include all
-		    // But we'll only add this window for now, and check if we need more
-		    windows.push_back (w);
-		}
-	    } else {
-		// For other modes (AllViewports, Group, etc.), add all windows
-		windows.push_back (w);
-	    }
-
+	    // Add all windows regardless of viewport or output
+	    windows.push_back (w);
 	    sw->cWindow->damageRectSetEnabled (sw, true);
 	}
-    }
-
-    // If in CurrentViewport mode and no windows were found, fall back to all windows
-    if (selection == CurrentViewport && windows.empty()) {
-        foreach (CompWindow *w, ::screen->windows ())
-        {
-            SWITCH_WINDOW (w);
-            if (sw->isSwitchWin ()) {
-                windows.push_back (w);
-            }
-        }
     }
 
     windows.sort (BaseSwitchScreen::compareWindows);
