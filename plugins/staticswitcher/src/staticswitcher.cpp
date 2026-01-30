@@ -31,59 +31,119 @@ COMPIZ_PLUGIN_20090315 (staticswitcher, StaticSwitchPluginVTable)
 
 const unsigned short ICON_SIZE = 48;
 
-const unsigned short PREVIEWSIZE = 150;
-const unsigned short BORDER = 10;
+const unsigned short DEFAULT_PREVIEW_WIDTH = 620;
+const unsigned short DEFAULT_PREVIEW_HEIGHT = 300;
+const unsigned short DEFAULT_BORDER = 15;
 
 void
 StaticSwitchScreen::updatePopupWindow ()
 {
     int    newXCount, newYCount;
     int    winWidth, winHeight;
-    float  aspect;
     int    count = windows.size ();
-    double dCount = count;
-    int    w = PREVIEWSIZE, h = PREVIEWSIZE, b = BORDER;
+    int    w = optionGetPreviewWidth();
+    int    h = optionGetPreviewHeight();
+    int    b = optionGetPreviewBorder();
     int    x, y;
     XSizeHints   xsh;
 
-    /* maximum window size is 2/3 of the current output */
-    winWidth  = ::screen->currentOutputDev ().width () * 2 / 3;
-    winHeight = ::screen->currentOutputDev ().height () * 2 / 3;
+    /* maximum window size is 98% of the current output */
+    winWidth  = ::screen->currentOutputDev ().width () * 98 / 100;
+    winHeight = ::screen->currentOutputDev ().height () * 98 / 100;
 
-    if (count <= 4)
+    if (count <= 1)
     {
-	/* don't put 4 or less windows in multiple rows */
-	newXCount = count;
+	/* Only 1 window, display it alone */
+	newXCount = 1;
 	newYCount = 1;
     }
     else
     {
-	aspect = (float) winWidth / winHeight;
-	/* round is available in C99 only, so use a replacement for that */
-	newYCount = floor (sqrt (dCount / aspect) + 0.5f);
-	newXCount = ceil (dCount / newYCount);
+	/* Calculate max columns based on available width */
+	int maxColsByWidth = (winWidth - 20) / (w + b);  // Subtract 20 for scrollbar space
+	maxColsByWidth = MAX(1, maxColsByWidth);  // At least 1 column
+
+	/* Calculate optimal number of columns to balance rows and columns */
+	newXCount = (int)sqrt(count * (double)(w + b) / (h + b));
+	newXCount = MIN(newXCount, maxColsByWidth);  // Don't exceed available width
+	newXCount = MIN(newXCount, count);  // Don't exceed number of windows
+	newXCount = MAX(1, newXCount);  // At least 1 column
+
+	/* Calculate rows needed based on chosen number of columns */
+	newYCount = (count + newXCount - 1) / newXCount;  // Ceiling division
     }
 
-    while ((w + b) * newXCount > winWidth ||
-	   (h + b) * newYCount > winHeight)
-    {
-	/* shrink by 10% until all windows fit */
-	w = w * 9 / 10;
-	h = h * 9 / 10;
-	b = b * 9 / 10;
+    // Account for scrollbar width if needed
+    int effectiveWidth = winWidth;
+    if (newXCount > 0) {
+        effectiveWidth = winWidth - 20;  // Reserve space for scrollbar
     }
 
-    winWidth = MIN (count, newXCount);
-    winHeight = (count + newXCount - 1) / newXCount;
+    // SAFER APPROACH: Calculate the scale factors needed to fit everything, instead of iterative shrinking
+    float scaleX = 1.0f, scaleY = 1.0f;
 
-    winWidth = winWidth * w + (winWidth + 1) * b;
-    winHeight = winHeight * h + (winHeight + 1) * b;
-    xCount = MIN (newXCount, count);
+    // Calculate required scale to fit horizontally
+    if ((w + b) * newXCount > effectiveWidth && effectiveWidth > 0) {
+        scaleX = (float)effectiveWidth / ((w + b) * newXCount);
+    }
+
+    // Calculate required scale to fit vertically
+    if ((h + b) * newYCount > winHeight && winHeight > 0) {
+        scaleY = (float)winHeight / ((h + b) * newYCount);
+    }
+
+    // Use the smaller scale to ensure everything fits
+    float minScale = MIN(scaleX, scaleY);
+
+    // Apply the scale if needed (only if scaling down)
+    if (minScale < 1.0f) {
+        w = (int)(w * minScale);
+        h = (int)(h * minScale);
+        b = (int)(b * minScale);
+
+        // Ensure minimum sizes to prevent windows from becoming too small
+        if (w < 50) w = 50;
+        if (h < 50) h = 50;
+        if (b < 2) b = 2;
+    }
+
+    // Calculate total rows needed
+    int totalRows = (count + newXCount - 1) / newXCount;
+    maxVisibleRows = MIN(5, totalRows);
+    scrollbarVisible = (totalRows > maxVisibleRows);
+
+    // Calculate actual dimensions
+    int actualXCount = MIN(newXCount, count);
+    int actualYCount = MIN(maxVisibleRows, totalRows);
+
+    if (scrollbarVisible) {
+        effectiveWidth -= 20;  // Reserve space for scrollbar
+    }
+
+    // Recalculate actualXCount based on effective width
+    if (count > 4 && effectiveWidth > 0) {
+        int maxColsByWidth = effectiveWidth / (w + b);
+        maxColsByWidth = MAX(1, maxColsByWidth);
+        actualXCount = MIN(actualXCount, maxColsByWidth);
+        actualXCount = MIN(actualXCount, count);
+    }
+
+    winWidth = actualXCount * w + (actualXCount + 1) * b;
+    winHeight = actualYCount * h + (actualYCount + 1) * b;
+
+    // Add space for scrollbar if visible
+    if (scrollbarVisible) {
+        winWidth += 20;  // Space for scrollbar
+    }
+
+    xCount = actualXCount;
 
     previewWidth = w;
     previewHeight = h;
     previewBorder = b;
 
+    // Position popup window in the center of the current output
+    // For multi-monitor setups, ensure it's centered on the current output
     x = ::screen->currentOutputDev ().region ()->extents.x1 +
 	::screen->currentOutputDev ().width () / 2;
     y = ::screen->currentOutputDev ().region ()->extents.y1 +
@@ -115,6 +175,9 @@ StaticSwitchScreen::updatePopupWindow ()
     else
 	XConfigureWindow (::screen->dpy (), popupWindow,
 			   valueMask, &xwc);
+
+    // Update scrollbar after window is configured
+    updateScrollbar();
 }
 
 void
@@ -140,10 +203,45 @@ StaticSwitchScreen::createWindowList ()
 
 	if (sw->isSwitchWin ())
 	{
-	    windows.push_back (w);
+	    // For CurrentViewport mode, only include windows on the current output
+	    if (selection == CurrentViewport) {
+		// Check if window is on the current output
+		CompOutput *currentOutput = &::screen->currentOutputDev();
+		CompRect windowRect(w->serverX(), w->serverY(), w->serverWidth(), w->serverHeight());
+		CompRect outputRect(currentOutput->region()->extents.x1,
+		                    currentOutput->region()->extents.y1,
+		                    currentOutput->region()->extents.x2 - currentOutput->region()->extents.x1,
+		                    currentOutput->region()->extents.y2 - currentOutput->region()->extents.y1);
+
+		// Only add window if it's on the current output or intersects with it
+		if (windowRect.intersects(outputRect)) {
+		    windows.push_back (w);
+		}
+		// If no windows are found on current output, fall back to all windows
+		// to prevent empty switcher
+		else if (windows.empty() && ::screen->windows().size() > 0) {
+		    // This is a fallback - if no windows on current output, include all
+		    // But we'll only add this window for now, and check if we need more
+		    windows.push_back (w);
+		}
+	    } else {
+		// For other modes (AllViewports, Group, etc.), add all windows
+		windows.push_back (w);
+	    }
 
 	    sw->cWindow->damageRectSetEnabled (sw, true);
 	}
+    }
+
+    // If in CurrentViewport mode and no windows were found, fall back to all windows
+    if (selection == CurrentViewport && windows.empty()) {
+        foreach (CompWindow *w, ::screen->windows ())
+        {
+            SWITCH_WINDOW (w);
+            if (sw->isSwitchWin ()) {
+                windows.push_back (w);
+            }
+        }
     }
 
     windows.sort (BaseSwitchScreen::compareWindows);
@@ -231,6 +329,84 @@ StaticSwitchScreen::handleSelectionChange (bool toNext, int nextIdx)
 {
     move = nextIdx;
     moreAdjust = true;
+
+    // Update selected window
+    if (nextIdx >= 0 && nextIdx < (int)windows.size())
+    {
+        CompWindowList::iterator it = windows.begin();
+        std::advance(it, nextIdx);
+        selectedWindow = *it;
+
+        // Calculate which row the selected window is in
+        unsigned int selectedRow = nextIdx / xCount;
+
+        // Adjust scroll offset to ensure selected window is visible
+        if (selectedRow < (unsigned int)scrollOffset) {
+            // Selected window is above the visible area
+            scrollOffset = selectedRow;
+        } else if (selectedRow >= (unsigned int)(scrollOffset + maxVisibleRows)) {
+            // Selected window is below the visible area
+            scrollOffset = selectedRow - maxVisibleRows + 1;
+        }
+
+        // Ensure scroll offset stays within bounds
+        if (scrollOffset < 0) scrollOffset = 0;
+        int maxScrollOffset = ((int)windows.size() + xCount - 1) / xCount - maxVisibleRows;
+        if (maxScrollOffset < 0) maxScrollOffset = 0;
+        if (scrollOffset > maxScrollOffset) scrollOffset = maxScrollOffset;
+
+        // Update scrollbar to reflect new scroll position
+        updateScrollbar();
+    }
+
+    // If switch-on-selected is enabled, switch immediately when selection changes
+    if (optionGetSwitchOnSelected() && grabIndex)
+    {
+        // Only activate if highlight_only is disabled
+        if (!optionGetHighlightOnly())
+        {
+            // Terminate the switcher immediately to switch to the selected window
+            CompOption::Vector o (0);
+            o.push_back (CompOption ("root", CompOption::TypeInt));
+            o[0].value ().set ((int) ::screen->root ());
+
+            // Replicate the termination logic from switchTerminate
+            if (popupDelayTimer.active ())
+                popupDelayTimer.stop ();
+
+            if (popupWindow)
+                XUnmapWindow (::screen->dpy (), popupWindow);
+
+            switching = false;
+
+            // State should be TermKey to indicate immediate termination
+            CompAction::State state = CompAction::StateTermKey;
+            if (state && selectedWindow && !selectedWindow->destroyed ())
+                ::screen->sendWindowActivationRequest (selectedWindow->id ());
+
+            ::screen->removeGrab (grabIndex, 0);
+            grabIndex = NULL;
+
+            if (!popupWindow)
+                ::screen->handleEventSetEnabled (this, false);
+
+            selectedWindow = NULL;
+
+            if (screen->activeWindow () != lastActiveWindow)
+            {
+                CompWindow *w = screen->findWindow (lastActiveWindow);
+
+                if (w)
+                    w->moveInputFocusTo ();
+            }
+
+            setSelectedWindowHint (false);
+
+            lastActiveNum = 0;
+
+            cScreen->damageScreen ();
+        }
+    }
 }
 
 void
@@ -382,7 +558,7 @@ StaticSwitchScreen::initiate (SwitchWindowSelection selection,
 		    showPopup ();
 		}
 
-		setSelectedWindowHint (optionGetFocusOnSwitch ());
+		setSelectedWindowHint (false);  // Disable focusing to prevent reorganization
 	    }
 
 	    lastActiveWindow = screen->activeWindow ();
@@ -552,26 +728,29 @@ StaticSwitchScreen::windowRemove (CompWindow *w)
 
 	old = selected = selectedWindow;
 
-	CompWindowList::iterator it = windows.begin ();
-	while (it != windows.end ())
+	// Safe way to remove element from list without invalidating iterators
+	CompWindowList::iterator it = windows.begin();
+	while (it != windows.end())
 	{
 	    if (*it == w)
 	    {
 		inList = true;
 
-		if (w == selected)
+		// Determine new selection if the removed window was selected
+		CompWindowList::iterator next_it = it;
+		++next_it;
+		if (next_it == windows.end() && windows.size() > 1)
 		{
-		    ++it;
-		    if (it == windows.end ())
-			selected = windows.front ();
-		    else
-			selected = *it;
-		    --it;
+		    next_it = windows.begin(); // wrap around to first
 		}
 
-		CompWindowList::iterator del = it;
-		++it;
-		windows.erase (del);
+		if (w == selected && windows.size() > 1)
+		{
+		    selected = *next_it;
+		}
+
+		it = windows.erase(it); // erase returns iterator to next element
+		break; // since we found and removed the window, break
 	    }
 	    else
 		++it;
@@ -595,15 +774,16 @@ StaticSwitchScreen::windowRemove (CompWindow *w)
 
 	updateWindowList ();
 
+	// Update selected window position
 	int i = 0;
-	foreach (CompWindow *w, windows)
+	for (CompWindowList::iterator it = windows.begin(); it != windows.end(); ++it, ++i)
 	{
-	    selectedWindow = w;
-	    move = pos = i;
-
-	    if (selectedWindow == selected)
+	    if (*it == selected)
+	    {
+		selectedWindow = *it;
+		move = pos = i;
 		break;
-	    i++;
+	    }
 	}
 
 	if (popupWindow)
@@ -614,7 +794,7 @@ StaticSwitchScreen::windowRemove (CompWindow *w)
 	    if (popup)
 		CompositeWindow::get (popup)->addDamage ();
 
-	    setSelectedWindowHint (optionGetFocusOnSwitch ());
+	    setSelectedWindowHint (false);  // Disable focusing to prevent reorganization
 	}
 
 	if (old != selectedWindow)
@@ -674,6 +854,44 @@ StaticSwitchScreen::getWindowPosition (unsigned int index,
     *y = row * previewHeight + (row + 1) * previewBorder;
 }
 
+bool
+StaticSwitchScreen::isCloseButtonClicked (CompWindow *w, int x, int y)
+{
+    if (!optionGetShowCloseButtons())
+        return false;
+
+    CompWindow *popup = ::screen->findWindow (popupWindow);
+    if (!popup)
+        return false;
+
+    unsigned int i = 0;
+    foreach (CompWindow *win, windows)
+    {
+        if (win == w)
+        {
+            int winX, winY;
+            getWindowPosition (i, &winX, &winY);
+
+            winX += popup->geometry ().x ();
+            winY += popup->geometry ().y ();
+
+            int buttonSize = optionGetCloseButtonSize();
+            int buttonX = winX + previewWidth - buttonSize - 5;
+            int buttonY = winY + 5;
+
+            if (x >= buttonX && x < buttonX + buttonSize &&
+                y >= buttonY && y < buttonY + buttonSize)
+            {
+                return true;
+            }
+            break;
+        }
+        i++;
+    }
+
+    return false;
+}
+
 CompWindow *
 StaticSwitchScreen::findWindowAt (int x,
 				  int y)
@@ -716,19 +934,90 @@ StaticSwitchScreen::handleEvent (XEvent *event)
     case ButtonPress:
 	if (grabIndex && mouseSelect)
 	{
-	    CompWindow *selected;
-
-	    selected = findWindowAt (event->xbutton.x_root,
-	    			     event->xbutton.y_root);
-	    if (selected)
+	    // Check if scrollbar was clicked first
+	    if (isScrollbarClicked(event->xbutton.x_root, event->xbutton.y_root))
 	    {
-	    	selectedWindow = selected;
+	        handleScrollbarDrag(event->xbutton.y_root);
 
-	    	CompOption::Vector o (0);
-	    	o.push_back (CompOption ("root", CompOption::TypeInt));
-	    	o[0].value ().set ((int) ::screen->root ());
+	        // Update the popup window to reflect the new scroll position
+	        if (popupWindow)
+	        {
+	            updatePopupWindow();
+	            CompWindow *popup = ::screen->findWindow (popupWindow);
+	            if (popup)
+	                CompositeWindow::get (popup)->addDamage ();
+	        }
+	    }
+	    else
+	    {
+	        CompWindow *selected;
 
-	    	switchTerminate (NULL, CompAction::StateTermButton, o);
+	        selected = findWindowAt (event->xbutton.x_root,
+	    	    			 event->xbutton.y_root);
+	        if (selected)
+	        {
+		    // Check if close button was clicked
+		    if (isCloseButtonClicked(selected, event->xbutton.x_root, event->xbutton.y_root))
+		    {
+		        // Close the selected window
+		        selected->close(CurrentTime);
+
+		        // Schedule window removal for later to avoid event handler issues
+		        // We'll remove it after processing the current event
+		        CompWindow *windowToRemove = selected;
+
+		        // Process the window removal safely
+		        windowRemove(windowToRemove);
+
+		        // If there are still windows, update the list
+		        if (windows.size() > 0)
+		        {
+			    updateWindowList();
+
+			    // If popup is visible, repaint it
+			    if (popupWindow)
+			    {
+			        CompWindow *popup = ::screen->findWindow (popupWindow);
+			        if (popup)
+				    CompositeWindow::get (popup)->addDamage ();
+			    }
+		        }
+		    }
+		    else
+		    {
+		        selectedWindow = selected;
+
+		        // Check if we should switch immediately or wait for Alt release
+		        if (optionGetSwitchOnSelected() && !optionGetHighlightOnly())
+		        {
+			    CompOption::Vector o (0);
+			    o.push_back (CompOption ("root", CompOption::TypeInt));
+			    o[0].value ().set ((int) ::screen->root ());
+
+			    // Use a safe termination approach
+			    if (grabIndex) // Double-check that grab still exists
+			    {
+			        switchTerminate (NULL, CompAction::StateTermButton, o);
+			    }
+			}
+			else
+			{
+			    // If not switching immediately, just update the selection
+			    // This prevents click-through to the underlying window
+			    move = windows.size(); // Just to trigger update
+			}
+		    }
+	        }
+		else
+		{
+		    // If click is not on any window or scrollbar, terminate the switcher
+		    // This handles clicks outside the switcher area
+		    CompOption::Vector o (0);
+		    o.push_back (CompOption ("root", CompOption::TypeInt));
+		    o[0].value ().set ((int) ::screen->root ());
+
+		    switchTerminate (NULL, CompAction::StateTermButton, o);
+		}
 	    }
 	}
 	break;
@@ -969,6 +1258,9 @@ StaticSwitchScreen::glPaintOutput (const GLScreenPaintAttrib &sAttrib,
 		    sw->gWindow->glPaint (sw->gWindow->paintAttrib (),
 					  sTransform, CompRegion::infinite (), 0);
 		}
+
+		// Draw scrollbar if visible
+		drawScrollbar(sTransform);
 	    }
 	}
     }
@@ -1031,6 +1323,7 @@ StaticSwitchScreen::paintSelectionRect (const GLMatrix &transform,
     h = previewHeight + previewBorder;
 
     glEnable (GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     if (dx > xCount - 1)
 	op = 1.0 - MIN (1.0, dx - (xCount - 1));
@@ -1041,8 +1334,20 @@ StaticSwitchScreen::paintSelectionRect (const GLMatrix &transform,
     else
 	op = 1.0;
 
-    for (unsigned int i = 0; i < 4; i++)
-	colorData[i] = (float)fgColor[i] * opacity * op / 0xffff;
+    // Use different colors depending on highlight_only mode
+    if (optionGetHighlightOnly())
+    {
+        // More prominent highlight for highlight-only mode
+        colorData[0] = 0xFFFF; // Red
+        colorData[1] = 0xFFFF; // Green
+        colorData[2] = 0x0000; // Blue (yellow border)
+        colorData[3] = (float)0xFFFF * opacity * op / 0xFFFF;
+    }
+    else
+    {
+        for (unsigned int i = 0; i < 4; i++)
+            colorData[i] = (float)fgColor[i] * opacity * op / 0xFFFF;
+    }
 
     sTransform.translate (x + previewBorder / 2 + (dx * w),
 		  y + previewBorder / 2 + (dy * h), 0.0f);
@@ -1054,7 +1359,7 @@ StaticSwitchScreen::paintSelectionRect (const GLMatrix &transform,
     vertexData[2]  = 0;
     vertexData[3]  = -1;
     vertexData[4]  = 1;
-    vertexData[5]  = 0;
+    vertexData[5] = 0;
     vertexData[6]  = w + 1;
     vertexData[7]  = -1;
     vertexData[8]  = 0;
@@ -1134,7 +1439,8 @@ StaticSwitchScreen::paintSelectionRect (const GLMatrix &transform,
     streamingBuffer->end ();
     streamingBuffer->render (sTransform);
 
-    glDisable (GL_BLEND);
+    // Restore previous OpenGL state
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 bool
@@ -1170,8 +1476,8 @@ StaticSwitchWindow::updateIconTexturedWindow (GLWindowPaintAttrib  &sAttrib,
     else
 	xScale = yScale;
 
-    sAttrib.xScale = (float) sScreen->previewWidth * xScale / PREVIEWSIZE;
-    sAttrib.yScale = (float) sScreen->previewWidth * yScale / PREVIEWSIZE;
+    sAttrib.xScale = (float) sScreen->previewWidth * xScale / DEFAULT_PREVIEW_WIDTH;
+    sAttrib.yScale = (float) sScreen->previewWidth * yScale / DEFAULT_PREVIEW_WIDTH;
 
     wx = x + sScreen->previewWidth - (sAttrib.xScale * icon->width ());
     wy = y + sScreen->previewHeight - (sAttrib.yScale * icon->height ());
@@ -1215,6 +1521,74 @@ StaticSwitchWindow::updateIconPos (int   &wx,
 }
 
 void
+StaticSwitchWindow::drawCloseButton(const GLMatrix &transform,
+				   int            x,
+				   int            y,
+				   int            previewWidth,
+				   int            previewHeight,
+				   unsigned int   opacity)
+{
+    if (!sScreen->optionGetShowCloseButtons())
+        return;
+
+    int buttonSize = sScreen->optionGetCloseButtonSize();
+    int buttonX = x + previewWidth - buttonSize - 5;
+    int buttonY = y + 5;
+
+    GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer();
+
+    // Draw close button background (red square)
+    GLushort bgColor[4] = {0xffff, 0x0000, 0x0000, static_cast<GLushort>((0xffff * opacity) / 100)};
+
+    GLfloat bgVertexData[12] = {
+        static_cast<GLfloat>(buttonX), static_cast<GLfloat>(buttonY + buttonSize), 0.0f,
+        static_cast<GLfloat>(buttonX), static_cast<GLfloat>(buttonY), 0.0f,
+        static_cast<GLfloat>(buttonX + buttonSize), static_cast<GLfloat>(buttonY + buttonSize), 0.0f,
+        static_cast<GLfloat>(buttonX + buttonSize), static_cast<GLfloat>(buttonY), 0.0f
+    };
+
+    GLushort bgColorData[4] = {bgColor[0], bgColor[1], bgColor[2], bgColor[3]};
+
+    glEnable(GL_BLEND);
+    streamingBuffer->begin(GL_TRIANGLE_STRIP);
+    streamingBuffer->addColors(1, bgColorData);
+    streamingBuffer->addVertices(4, bgVertexData);
+    streamingBuffer->end();
+    streamingBuffer->render(transform);
+
+    // Draw close button cross (white lines)
+    GLushort crossColor[4] = {0xffff, 0xffff, 0xffff, static_cast<GLushort>((0xffff * opacity) / 100)};
+
+    // First line of the cross (top-left to bottom-right)
+    GLfloat cross1VertexData[6] = {
+        static_cast<GLfloat>(buttonX + 3), static_cast<GLfloat>(buttonY + 3), 0.0f,
+        static_cast<GLfloat>(buttonX + buttonSize - 3), static_cast<GLfloat>(buttonY + buttonSize - 3), 0.0f
+    };
+
+    // Second line of the cross (top-right to bottom-left)
+    GLfloat cross2VertexData[6] = {
+        static_cast<GLfloat>(buttonX + buttonSize - 3), static_cast<GLfloat>(buttonY + 3), 0.0f,
+        static_cast<GLfloat>(buttonX + 3), static_cast<GLfloat>(buttonY + buttonSize - 3), 0.0f
+    };
+
+    GLushort crossColorData[4] = {crossColor[0], crossColor[1], crossColor[2], crossColor[3]};
+
+    streamingBuffer->begin(GL_LINES);
+    streamingBuffer->addColors(1, crossColorData);
+    streamingBuffer->addVertices(2, cross1VertexData);
+    streamingBuffer->end();
+    streamingBuffer->render(transform);
+
+    streamingBuffer->begin(GL_LINES);
+    streamingBuffer->addColors(1, crossColorData);
+    streamingBuffer->addVertices(2, cross2VertexData);
+    streamingBuffer->end();
+    streamingBuffer->render(transform);
+
+    glDisable(GL_BLEND);
+}
+
+void
 StaticSwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
 			  const GLMatrix            &transform,
 		          unsigned int              mask,
@@ -1230,6 +1604,11 @@ StaticSwitchWindow::paintThumb (const GLWindowPaintAttrib &attrib,
 				  sScreen->previewHeight,
 				  sScreen->previewWidth * 3 / 4,
 				  sScreen->previewHeight * 3 / 4);
+
+    // Draw close button if enabled
+    if (sScreen->optionGetShowCloseButtons()) {
+        drawCloseButton(transform, x, y, sScreen->previewWidth, sScreen->previewHeight, attrib.opacity);
+    }
 }
 
 bool
@@ -1263,13 +1642,33 @@ StaticSwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	glEnable (GL_SCISSOR_TEST);
 	glScissor (g.x (), 0, g.width (), ::screen->height ());
 
+	// Only paint windows that are currently visible based on scroll offset
+	unsigned int totalWindows = sScreen->windows.size();
+	unsigned int totalRows = (totalWindows + sScreen->xCount - 1) / sScreen->xCount;
+	unsigned int startRow = sScreen->scrollOffset;
+	unsigned int endRow = startRow + sScreen->maxVisibleRows;
+
+	if (endRow > totalRows)
+	    endRow = totalRows;
+
 	unsigned int i = 0;
 	foreach (CompWindow *w, sScreen->windows)
 	{
-	    sScreen->getWindowPosition (i, &x, &y);
-	    StaticSwitchWindow::get (w)->paintThumb (
-	       gWindow->lastPaintAttrib (), transform,
-	       mask, x + g.x (), y + g.y ());
+	    unsigned int row = i / sScreen->xCount;
+
+	    // Only paint if the window's row is within the visible range
+	    if (row >= startRow && row < endRow)
+	    {
+		sScreen->getWindowPosition (i, &x, &y);
+
+		// Adjust y position based on scroll offset to show the correct portion
+		int rowOffset = (startRow) * (sScreen->previewHeight + sScreen->previewBorder);
+		int adjustedY = y - rowOffset;
+
+		StaticSwitchWindow::get (w)->paintThumb (
+		   gWindow->lastPaintAttrib (), transform,
+		   mask, x + g.x (), adjustedY + g.y ());
+	    }
 	    i++;
 	}
 
@@ -1277,36 +1676,44 @@ StaticSwitchWindow::glPaint (const GLWindowPaintAttrib &attrib,
 	px  = fmod (pos, sScreen->xCount);
 	py  = floor (pos / sScreen->xCount);
 
-	offX = sScreen->getRowXOffset (py);
-
-	if (pos > count - 1)
+	// Only draw selection rectangle if the selected window is visible
+	unsigned int selectedRow = (unsigned int)py;
+	if ((int)selectedRow >= sScreen->scrollOffset && (int)selectedRow < sScreen->scrollOffset + sScreen->maxVisibleRows)
 	{
-	    px = fmod (pos - count, sScreen->xCount);
-	    sScreen->paintSelectionRect (transform, g.x (), g.y (), px, 0.0,
-	    				 gWindow->lastPaintAttrib ().opacity);
-
-	    px = fmod (pos, sScreen->xCount);
-	    sScreen->paintSelectionRect (transform, g.x () + offX, g.y (),
-	    				 px, py,
-	    				 gWindow->lastPaintAttrib ().opacity);
-	}
-	if (px > sScreen->xCount - 1)
-	{
-	    sScreen->paintSelectionRect (transform, g.x (), g.y (), px, py,
-	    				 gWindow->lastPaintAttrib ().opacity);
-
-	    py = fmod (py + 1, ceil ((double) count / sScreen->xCount));
 	    offX = sScreen->getRowXOffset (py);
 
-	    sScreen->paintSelectionRect (transform, g.x () + offX, g.y (),
-	    				 px - sScreen->xCount, py,
+	    // Adjust py to be relative to the visible area
+	    float adjustedPy = py - sScreen->scrollOffset;
+
+	    if (pos > count - 1)
+	    {
+		px = fmod (pos - count, sScreen->xCount);
+		sScreen->paintSelectionRect (transform, g.x (), g.y (), px, 0.0,
 	    				 gWindow->lastPaintAttrib ().opacity);
-	}
-	else
-	{
-	    sScreen->paintSelectionRect (transform, g.x () + offX, g.y (),
-	    				 px, py,
+
+		px = fmod (pos, sScreen->xCount);
+		sScreen->paintSelectionRect (transform, g.x () + offX, g.y (),
+	    				 px, adjustedPy,
 	    				 gWindow->lastPaintAttrib ().opacity);
+	    }
+	    if (px > sScreen->xCount - 1)
+	    {
+		sScreen->paintSelectionRect (transform, g.x (), g.y (), px, adjustedPy,
+	    				 gWindow->lastPaintAttrib ().opacity);
+
+		float adjustedPyNext = fmod(adjustedPy + 1, ceil ((double) count / sScreen->xCount));
+		offX = sScreen->getRowXOffset ((int)adjustedPyNext);
+
+		sScreen->paintSelectionRect (transform, g.x () + offX, g.y (),
+	    				 px - sScreen->xCount, adjustedPyNext,
+	    				 gWindow->lastPaintAttrib ().opacity);
+	    }
+	    else
+	    {
+		sScreen->paintSelectionRect (transform, g.x () + offX, g.y (),
+	    				 px, adjustedPy,
+	    				 gWindow->lastPaintAttrib ().opacity);
+	    }
 	}
 	glDisable (GL_SCISSOR_TEST);
     }
@@ -1358,7 +1765,17 @@ StaticSwitchScreen::StaticSwitchScreen (CompScreen *screen) :
     mVelocity (0.0),
     pos (0),
     move (0),
-    mouseSelect (false)
+    mouseSelect (false),
+    scrollOffset (0),
+    maxVisibleRows (0),
+    totalRows (0),
+    scrollbarVisible (false),
+    scrollbarX (0),
+    scrollbarY (0),
+    scrollbarWidth (12),
+    scrollbarHeight (0),
+    scrollbarThumbY (0),
+    scrollbarThumbHeight (0)
 {
     auto bgUpdater = [=] (...){ this->updateBackground (this->optionGetUseBackgroundColor (), this->optionGetBackgroundColor ());};
     optionSetUseBackgroundColorNotify (bgUpdater);
@@ -1411,6 +1828,8 @@ StaticSwitchScreen::StaticSwitchScreen (CompScreen *screen) :
     optionSetPrevPanelKeyInitiate (SWITCHBIND (Panels, false, false));
     optionSetPrevPanelKeyTerminate (switchTerminate);
 
+    optionSetCloseSelectedKeyInitiate (boost::bind (&StaticSwitchScreen::closeSelected, this, _1, _2, _3));
+
 #undef SWITCHBIND
 
     ScreenInterface::setHandler (screen, false);
@@ -1418,6 +1837,159 @@ StaticSwitchScreen::StaticSwitchScreen (CompScreen *screen) :
     GLScreenInterface::setHandler (gScreen, false);
 }
 
+
+bool
+StaticSwitchScreen::closeSelected(CompAction *action,
+                                 CompAction::State state,
+                                 CompOption::Vector &options)
+{
+    Window xid = (Window) CompOption::getIntOptionNamed (options, "root");
+
+    if (xid != ::screen->root ())
+	return false;
+
+    if (!switching || !selectedWindow || selectedWindow->destroyed ())
+	return false;
+
+    // Close the selected window
+    selectedWindow->close(CurrentTime);
+
+    // Remove the window from the switcher list
+    windowRemove(selectedWindow);
+
+    // If there are still windows, update the list
+    if (windows.size() > 0)
+    {
+        updateWindowList();
+
+        // If popup is visible, repaint it
+        if (popupWindow)
+        {
+            CompWindow *popup = ::screen->findWindow (popupWindow);
+            if (popup)
+                CompositeWindow::get (popup)->addDamage ();
+        }
+    }
+    else
+    {
+        // If no more windows, terminate the switcher
+        CompOption::Vector o (0);
+        o.push_back (CompOption ("root", CompOption::TypeInt));
+        o[0].value ().set ((int) ::screen->root ());
+
+        switchTerminate (NULL, CompAction::StateTermKey, o);
+    }
+
+    return false;
+}
+
+void
+StaticSwitchScreen::updateScrollbar()
+{
+    // Calculate total rows needed
+    totalRows = (windows.size() + xCount - 1) / xCount;
+
+    // Maximum visible rows based on window height
+    maxVisibleRows = MIN(5, totalRows); // Limited to 5 as per requirement
+
+    // Check if scrolling is needed
+    scrollbarVisible = (totalRows > maxVisibleRows);
+
+    if (scrollbarVisible) {
+        // Position scrollbar on the right side of the popup window
+        if (popupWindow) {
+            CompWindow *popup = ::screen->findWindow (popupWindow);
+            if (popup) {
+                scrollbarX = popup->geometry ().x () + popup->geometry ().width () - 15; // 15px from right edge
+                scrollbarY = popup->geometry ().y () + 10; // 10px margin from top
+                scrollbarHeight = popup->geometry ().height () - 20; // 10px margin from top and bottom
+
+                // Calculate thumb size based on ratio of visible to total
+                float thumbRatio = (float)maxVisibleRows / totalRows;
+                scrollbarThumbHeight = (int)(scrollbarHeight * thumbRatio);
+
+                // Calculate thumb position based on current scroll offset
+                float scrollRatio = (float)scrollOffset / (totalRows - maxVisibleRows);
+                scrollbarThumbY = scrollbarY + (int)(scrollRatio * (scrollbarHeight - scrollbarThumbHeight));
+            }
+        }
+    }
+}
+
+void
+StaticSwitchScreen::drawScrollbar(const GLMatrix &transform)
+{
+    if (!scrollbarVisible)
+        return;
+
+    GLVertexBuffer *streamingBuffer = GLVertexBuffer::streamingBuffer();
+
+    // Draw scrollbar track
+    GLushort trackColor[4] = {0x8080, 0x8080, 0x8080, 0x8000}; // Gray with transparency
+    GLfloat trackVertexData[12] = {
+        static_cast<GLfloat>(scrollbarX), static_cast<GLfloat>(scrollbarY + scrollbarHeight), 0.0f,
+        static_cast<GLfloat>(scrollbarX), static_cast<GLfloat>(scrollbarY), 0.0f,
+        static_cast<GLfloat>(scrollbarX + scrollbarWidth), static_cast<GLfloat>(scrollbarY + scrollbarHeight), 0.0f,
+        static_cast<GLfloat>(scrollbarX + scrollbarWidth), static_cast<GLfloat>(scrollbarY), 0.0f
+    };
+
+    glEnable(GL_BLEND);
+    streamingBuffer->begin(GL_TRIANGLE_STRIP);
+    streamingBuffer->addColors(1, trackColor);
+    streamingBuffer->addVertices(4, trackVertexData);
+    streamingBuffer->end();
+    streamingBuffer->render(transform);
+
+    // Draw scrollbar thumb
+    GLushort thumbColor[4] = {0xa0a0, 0xa0a0, 0xa0a0, 0xc000}; // Lighter gray with more opacity
+    GLfloat thumbVertexData[12] = {
+        static_cast<GLfloat>(scrollbarX), static_cast<GLfloat>(scrollbarThumbY + scrollbarThumbHeight), 0.0f,
+        static_cast<GLfloat>(scrollbarX), static_cast<GLfloat>(scrollbarThumbY), 0.0f,
+        static_cast<GLfloat>(scrollbarX + scrollbarWidth), static_cast<GLfloat>(scrollbarThumbY + scrollbarThumbHeight), 0.0f,
+        static_cast<GLfloat>(scrollbarX + scrollbarWidth), static_cast<GLfloat>(scrollbarThumbY), 0.0f
+    };
+
+    streamingBuffer->begin(GL_TRIANGLE_STRIP);
+    streamingBuffer->addColors(1, thumbColor);
+    streamingBuffer->addVertices(4, thumbVertexData);
+    streamingBuffer->end();
+    streamingBuffer->render(transform);
+    glDisable(GL_BLEND);
+}
+
+bool
+StaticSwitchScreen::isScrollbarClicked(int x, int y)
+{
+    if (!scrollbarVisible)
+        return false;
+
+    // Check if the click is within the scrollbar bounds
+    // scrollbar coordinates are in screen coordinates
+    return (x >= scrollbarX && x <= scrollbarX + scrollbarWidth &&
+            y >= scrollbarY && y <= scrollbarY + scrollbarHeight);
+}
+
+void
+StaticSwitchScreen::handleScrollbarDrag(int y)
+{
+    if (!scrollbarVisible)
+        return;
+
+    // Calculate the new scroll position based on mouse position
+    float relativeY = (float)(y - scrollbarY) / scrollbarHeight;
+    relativeY = MAX(0.0f, MIN(1.0f, relativeY)); // Clamp between 0 and 1
+
+    int maxScrollOffset = MAX(1, totalRows - maxVisibleRows);
+    scrollOffset = (int)(relativeY * maxScrollOffset);
+
+    // Clamp scroll offset
+    scrollOffset = MIN(scrollOffset, maxScrollOffset);
+    scrollOffset = MAX(0, scrollOffset);
+
+    // Update the thumb position
+    float scrollRatio = (float)scrollOffset / maxScrollOffset;
+    scrollbarThumbY = scrollbarY + (int)(scrollRatio * (scrollbarHeight - scrollbarThumbHeight));
+}
 
 StaticSwitchScreen::~StaticSwitchScreen ()
 {

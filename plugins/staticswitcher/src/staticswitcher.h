@@ -115,6 +115,29 @@ class StaticSwitchScreen :
 	float move;
 
 	bool mouseSelect;
+
+	// Scrollbar related variables
+	int scrollOffset;
+	int maxVisibleRows;
+	int totalRows;
+	bool scrollbarVisible;
+	int scrollbarX;
+	int scrollbarY;
+	int scrollbarWidth;
+	int scrollbarHeight;
+	int scrollbarThumbY;
+	int scrollbarThumbHeight;
+
+	bool closeSelected(CompAction *action,
+	                  CompAction::State state,
+	                  CompOption::Vector &options);
+
+	bool isCloseButtonClicked (CompWindow *w, int x, int y);
+
+	void updateScrollbar();
+	void drawScrollbar(const GLMatrix &transform);
+	bool isScrollbarClicked(int x, int y);
+	void handleScrollbarDrag(int y);
 };
 
 class StaticSwitchWindow :
@@ -157,13 +180,21 @@ class StaticSwitchWindow :
 
 	IconMode getIconMode ();
 
+	void drawCloseButton(const GLMatrix &transform,
+			     int            x,
+			     int            y,
+			     int            previewWidth,
+			     int            previewHeight,
+			     unsigned int   opacity);
+
 	StaticSwitchScreen    *sScreen;
 };
 
 extern const unsigned short MAX_ICON_SIZE;
 
-extern const unsigned short PREVIEWSIZE;
-extern const unsigned short BORDER;
+extern const unsigned short DEFAULT_PREVIEW_WIDTH;
+extern const unsigned short DEFAULT_PREVIEW_HEIGHT;
+extern const unsigned short DEFAULT_BORDER;
 
 #define SWITCH_SCREEN(s) \
     StaticSwitchScreen *ss = StaticSwitchScreen::get (s)
