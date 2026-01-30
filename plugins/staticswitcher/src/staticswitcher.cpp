@@ -925,6 +925,122 @@ StaticSwitchScreen::handleEvent (XEvent *event)
 	    }
 	}
 	break;
+    case KeyPress:
+        if (grabIndex)
+        {
+            KeySym keysym = XLookupKeysym(&event->xkey, 0);
+
+            // Handle arrow key navigation
+            if (keysym == XK_Left || keysym == XK_Right || keysym == XK_Up || keysym == XK_Down)
+            {
+                if (windows.size() <= 1) break; // Nothing to navigate if 1 or no windows
+
+                int currentIndex = 0;
+                int targetIndex = 0;
+
+                // Find current selected window index
+                currentIndex = 0;
+                CompWindowList::iterator it;
+                for (it = windows.begin(); it != windows.end(); ++it)
+                {
+                    if (*it == selectedWindow)
+                    {
+                        break;
+                    }
+                    currentIndex++;
+                }
+
+                // If selectedWindow is not found in the list, use the first window
+                if (it == windows.end() && !windows.empty())
+                {
+                    currentIndex = 0;
+                    selectedWindow = *(windows.begin());
+                }
+
+                // Calculate target index based on arrow key
+                int cols = xCount;
+
+                switch (keysym)
+                {
+                    case XK_Left:
+                        targetIndex = (currentIndex > 0) ? currentIndex - 1 : windows.size() - 1;
+                        break;
+                    case XK_Right:
+                        targetIndex = (currentIndex < (int)windows.size() - 1) ? currentIndex + 1 : 0;
+                        break;
+                    case XK_Up:
+                        // Move up one row (subtracting number of columns)
+                        targetIndex = currentIndex - cols;
+                        if (targetIndex < 0) {
+                            // Wrap to the same column in the last row
+                            int col = currentIndex % cols;
+                            int lastRowElements = windows.size() % cols;
+                            if (lastRowElements == 0) lastRowElements = cols;
+
+                            if (col >= lastRowElements) {
+                                // If the column doesn't exist in the last row, use the last element in that row
+                                targetIndex = windows.size() - (cols - col);
+                            } else {
+                                targetIndex = windows.size() - lastRowElements + col;
+                            }
+                        }
+                        break;
+                    case XK_Down:
+                        // Move down one row (adding number of columns)
+                        targetIndex = currentIndex + cols;
+                        if (targetIndex >= (int)windows.size()) {
+                            // Wrap to the same column in the first row
+                            int col = currentIndex % cols;
+                            targetIndex = col;
+                        }
+                        break;
+                }
+
+                // Ensure target index is valid
+                if (targetIndex < 0) targetIndex = 0;
+                if (targetIndex >= (int)windows.size()) targetIndex = windows.size() - 1;
+
+                // Update selection to the target window
+                CompWindowList::iterator targetIt = windows.begin();
+                std::advance(targetIt, targetIndex);
+                selectedWindow = *targetIt;
+
+                // Update the move position for animation
+                move = targetIndex;
+                moreAdjust = true;
+
+                // Update scrollbar if needed
+                unsigned int selectedRow = targetIndex / xCount;
+                if (selectedRow < (unsigned int)scrollOffset) {
+                    scrollOffset = selectedRow;
+                } else if (selectedRow >= (unsigned int)(scrollOffset + maxVisibleRows)) {
+                    scrollOffset = selectedRow - maxVisibleRows + 1;
+                }
+                updateScrollbar();
+
+                // Damage the screen to update the display
+                cScreen->damageScreen();
+            }
+            // Handle Enter/Return to activate selected window
+            else if (keysym == XK_Return || keysym == XK_KP_Enter)
+            {
+                CompOption::Vector o (0);
+                o.push_back (CompOption ("root", CompOption::TypeInt));
+                o[0].value ().set ((int) ::screen->root ());
+
+                switchTerminate (NULL, CompAction::StateTermKey, o);
+            }
+            // Handle Escape to cancel
+            else if (keysym == XK_Escape)
+            {
+                CompOption::Vector o (0);
+                o.push_back (CompOption ("root", CompOption::TypeInt));
+                o[0].value ().set ((int) ::screen->root ());
+
+                switchTerminate (NULL, CompAction::StateCancel, o);
+            }
+        }
+        break;
     default:
 	break;
     }
