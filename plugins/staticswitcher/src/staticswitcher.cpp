@@ -52,7 +52,7 @@ StaticSwitchScreen::updatePopupWindow ()
     winHeight = ::screen->currentOutputDev ().height () * 98 / 100;
 
     /* Calculate max columns based on available width */
-    int maxColsByWidth = (winWidth - 20) / (w + b);  // Subtract 20 for scrollbar space
+    int maxColsByWidth = winWidth / (w + b);  // Don't subtract 20 here, we'll handle scrollbar separately
     maxColsByWidth = MAX(1, maxColsByWidth);  // At least 1 column
 
     /* Use a fixed number of columns based on available width, regardless of window count */
@@ -107,7 +107,7 @@ StaticSwitchScreen::updatePopupWindow ()
     // Calculate actual dimensions
     int actualXCount = MIN(newXCount, count);
     int actualYCount = MIN(maxVisibleRows, totalRows);
-
+ 
     if (scrollbarVisible) {
         effectiveWidth -= 20;  // Reserve space for scrollbar
     }
