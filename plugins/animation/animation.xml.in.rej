@@ -120,15 +120,6 @@
  	    <min>-2</min>
  	    <max>1</max>
  	    <precision>0.05</precision>
-@@ -481,7 +481,7 @@
- 	  <option name="glide2_away_angle" type="float">
- 	    <_short>Away Angle</_short>
- 	    <_long>Angle of window at the end of the animation.</_long>
--	    <default>0</default>
-+	    <default>-45</default>
- 	    <min>-540</min>
- 	    <max>540</max>
- 	    <precision>5</precision>
 @@ -686,7 +686,7 @@
  	  <option name="zoom_springiness" type="float">
  	    <_short>Springiness</_short>

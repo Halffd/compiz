@@ -456,7 +456,7 @@
 	  <option name="glide1_away_angle" type="float">
 	    <_short>Away Angle</_short>
 	    <_long>Angle of window at the end of the animation.</_long>
-	    <default>-45</default>
+	    <default>0</default>
 	    <min>-540</min>
 	    <max>540</max>
 	    <precision>5</precision>

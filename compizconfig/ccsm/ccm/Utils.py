@@ -24,6 +24,7 @@ from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
+from gi.repository import Pango
 import weakref
 
 from ccm.Constants import ImageNone, ImagePlugin, ImageCategory, ImageThemed, ImageStock, DataDir, IconDir
@@ -174,7 +175,7 @@ class Label(Gtk.Label):
     def __init__(self, value = "", wrap = 160):
         Gtk.Label.__init__(self, label=value)
         self.props.xalign = 0
-        self.props.wrap_mode = Gtk.WrapMode.WORD
+        self.props.wrap_mode = Pango.WrapMode.WORD
         self.props.max_width_chars = 20;
         self.set_line_wrap(True)
         self.set_size_request(wrap, -1)

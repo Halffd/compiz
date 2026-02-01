@@ -34,7 +34,6 @@ const unsigned short ICON_SIZE = 48;
 const unsigned short DEFAULT_PREVIEW_WIDTH = 620;
 const unsigned short DEFAULT_PREVIEW_HEIGHT = 300;
 const unsigned short DEFAULT_BORDER = 15;
-
 void
 StaticSwitchScreen::updatePopupWindow ()
 {
@@ -52,26 +51,17 @@ StaticSwitchScreen::updatePopupWindow ()
     winHeight = ::screen->currentOutputDev ().height () * 98 / 100;
 
     /* Calculate max columns based on available width */
-    int maxColsByWidth = winWidth / (w + b);  // Don't subtract 20 here, we'll handle scrollbar separately
-    maxColsByWidth = MAX(1, maxColsByWidth);  // At least 1 column
+    int effectiveWidth = winWidth - 20;  // Reserve space for potential scrollbar
+    int maxColsByWidth = effectiveWidth / (w + b);
+    maxColsByWidth = MAX(1, maxColsByWidth);
 
-    /* Use a fixed number of columns based on available width, regardless of window count */
+    /* Use max columns based on width */
     newXCount = maxColsByWidth;
-    if (newXCount > count) {
-        newXCount = count;  // Don't exceed number of windows
-    }
-    newXCount = MAX(1, newXCount);  // At least 1 column
+    
+    /* Calculate rows needed */
+    newYCount = (count + newXCount - 1) / newXCount;
 
-    /* Calculate rows needed based on chosen number of columns */
-    newYCount = (count + newXCount - 1) / newXCount;  // Ceiling division
-
-    // Account for scrollbar width if needed
-    int effectiveWidth = winWidth;
-    if (newXCount > 0) {
-        effectiveWidth = winWidth - 20;  // Reserve space for scrollbar
-    }
-
-    // SAFER APPROACH: Calculate the scale factors needed to fit everything, instead of iterative shrinking
+    // Calculate the scale factors needed to fit everything
     float scaleX = 1.0f, scaleY = 1.0f;
 
     // Calculate required scale to fit horizontally
@@ -79,7 +69,7 @@ StaticSwitchScreen::updatePopupWindow ()
         scaleX = (float)effectiveWidth / ((w + b) * newXCount);
     }
 
-    // Calculate required scale to fit vertically
+    // Calculate required scale to fit vertically  
     if ((h + b) * newYCount > winHeight && winHeight > 0) {
         scaleY = (float)winHeight / ((h + b) * newYCount);
     }
@@ -93,53 +83,44 @@ StaticSwitchScreen::updatePopupWindow ()
         h = (int)(h * minScale);
         b = (int)(b * minScale);
 
-        // Ensure minimum sizes to prevent windows from becoming too small
+        // Ensure minimum sizes
         if (w < 50) w = 50;
         if (h < 50) h = 50;
         if (b < 2) b = 2;
+        
+        // RECALCULATE columns and rows based on scaled sizes
+        maxColsByWidth = effectiveWidth / (w + b);
+        maxColsByWidth = MAX(1, maxColsByWidth);
+        newXCount = maxColsByWidth;
+        newYCount = (count + newXCount - 1) / newXCount;
     }
 
-    // Calculate total rows needed
-    int totalRows = (count + newXCount - 1) / newXCount;
+    // Calculate total rows and scrollbar visibility
+    int totalRows = newYCount;
     maxVisibleRows = MIN(5, totalRows);
     scrollbarVisible = (totalRows > maxVisibleRows);
 
-    // Calculate actual dimensions
-    int actualXCount = MIN(newXCount, count);
+    int actualXCount = newXCount;
     int actualYCount = MIN(maxVisibleRows, totalRows);
  
-    if (scrollbarVisible) {
-        effectiveWidth -= 20;  // Reserve space for scrollbar
-    }
-
-    // Recalculate actualXCount based on effective width
-    if (count > 4 && effectiveWidth > 0) {
-        int maxColsByWidth = effectiveWidth / (w + b);
-        maxColsByWidth = MAX(1, maxColsByWidth);
-        actualXCount = MIN(actualXCount, maxColsByWidth);
-        actualXCount = MIN(actualXCount, count);
-    }
-
+    // Account for scrollbar in final width
     winWidth = actualXCount * w + (actualXCount + 1) * b;
     winHeight = actualYCount * h + (actualYCount + 1) * b;
 
-    // Add space for scrollbar if visible
     if (scrollbarVisible) {
-        winWidth += 20;  // Space for scrollbar
+        winWidth += 20;  // Add scrollbar width
     }
 
     xCount = actualXCount;
-
     previewWidth = w;
     previewHeight = h;
     previewBorder = b;
 
     // Position popup window in the center of the current output
-    // For multi-monitor setups, ensure it's centered on the current output
     x = ::screen->currentOutputDev ().region ()->extents.x1 +
-	::screen->currentOutputDev ().width () / 2;
+        ::screen->currentOutputDev ().width () / 2;
     y = ::screen->currentOutputDev ().region ()->extents.y1 +
-	::screen->currentOutputDev ().height () / 2;
+        ::screen->currentOutputDev ().height () / 2;
 
     xsh.flags       = PSize | PPosition | PWinGravity;
     xsh.x           = x;
@@ -163,15 +144,13 @@ StaticSwitchScreen::updatePopupWindow ()
     xwc.height = winHeight;
 
     if (popup)
-	popup->configureXWindow (valueMask, &xwc);
+        popup->configureXWindow (valueMask, &xwc);
     else
-	XConfigureWindow (::screen->dpy (), popupWindow,
-			   valueMask, &xwc);
+        XConfigureWindow (::screen->dpy (), popupWindow,
+                          valueMask, &xwc);
 
-    // Update scrollbar after window is configured
     updateScrollbar();
 }
-
 void
 StaticSwitchScreen::updateWindowList ()
 {

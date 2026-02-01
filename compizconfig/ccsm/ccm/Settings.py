@@ -23,6 +23,7 @@
 from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
+from gi.repository import Pango
 
 from ccm.Constants import TableDef, TableX, KeyModifier, Edges, ImageStock, FilterName, FilterLongDesc, FilterValue, FilterAll, DataDir
 from ccm.Conflicts import KeyConflict, ButtonConflict, EdgeConflict
@@ -115,7 +116,7 @@ class Setting(object):
         label.set_markup(style % desc)
         label.props.xalign = 0
         label.set_size_request(160, -1)
-        label.props.wrap_mode = Gtk.WrapMode.WORD
+        label.props.wrap_mode = Pango.WrapMode.WORD
         label.set_line_wrap(True)
         self.Label = label
 
