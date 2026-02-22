@@ -333,9 +333,9 @@
 				<option name="mmmode" type="int">
 					<_short>Multimonitor behavior</_short>
 					<_long>How should a multimonitor configuration be handled</_long>
-					<default>0</default>
+					<default>2</default>
 					<min>0</min>
-					<max>1</max>
+					<max>3</max>
 					<desc>
 						<value>0</value>
 						<_name>Switch all</_name>
@@ -343,6 +343,14 @@
 					<desc>
 						<value>1</value>
 						<_name>Switch separately</_name>
+					</desc>
+					<desc>
+						<value>2</value>
+						<_name>Per-monitor workspaces</_name>
+					</desc>
+					<desc>
+						<value>3</value>
+						<_name>Primary monitor only</_name>
 					</desc>
 				</option>
 			</group>
